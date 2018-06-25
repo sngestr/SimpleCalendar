@@ -48,12 +48,16 @@ public class EventListAdapter extends BaseAdapter {
             convertView = layoutInflater.inflate(R.layout.layout_event_item, parent,false);
             viewHolder.event_title_tv = convertView.findViewById(R.id.event_title_tv);
             viewHolder.event_description_tv = convertView.findViewById(R.id.event_description_tv);
+            viewHolder.startTime_tv = convertView.findViewById(R.id.event_start_time_tv);
+            viewHolder.endTime_tv = convertView.findViewById(R.id.event_end_time_tv);
             convertView.setTag(viewHolder);
         } else {
             viewHolder = (EventListAdapter.ViewHolder) convertView.getTag();
         }
 
         viewHolder.event_title_tv.setText(event.getTitle());
+        viewHolder.startTime_tv.setText(event.getStartTime());
+        viewHolder.endTime_tv.setText(event.getEndTime());
         viewHolder.event_description_tv.setText(event.getDescription());
 
         return convertView;
@@ -62,5 +66,7 @@ public class EventListAdapter extends BaseAdapter {
     public class ViewHolder {
         TextView event_title_tv;
         TextView event_description_tv;
+        TextView startTime_tv;
+        TextView endTime_tv;
     }
 }
