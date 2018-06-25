@@ -20,6 +20,7 @@ public class CalendarViewAdapter extends BaseAdapter {
         this.context = context;
         this.days = days;
     }
+
     @Override
     public int getCount() {
         return days.length;
