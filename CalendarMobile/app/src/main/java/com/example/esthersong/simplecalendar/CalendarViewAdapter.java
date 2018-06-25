@@ -83,11 +83,22 @@ public class CalendarViewAdapter extends BaseAdapter {
 
         LinearLayout daybox = convertView.findViewById(R.id.day_cell_ll);
 
+        // Call popup method to create event on long click
+        daybox.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if(context instanceof MainActivity) {
+                    ((MainActivity)context).createEvent(position);
+                }
+                return false;
+            }
+        });
+        // Call show event method to display all the event's detail on that day
         daybox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(context instanceof MainActivity) {
-                    ((MainActivity)context).createEvent(position);
+                    ((MainActivity)context).showDayEvent(position);
                 }
             }
         });

@@ -31,16 +31,32 @@ public class Event {
         return year;
     }
 
+    public void setDescription(String description){
+        this.description = description;
+    }
+
     public String getDescription() {
         return description;
+    }
+
+    public void setEndTime(String endTime) {
+        this.endTime = endTime;
     }
 
     public String getEndTime() {
         return endTime;
     }
 
+    public void setStartTime(String startTime){
+        this.startTime = startTime;
+    }
+
     public String getStartTime() {
         return startTime;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getTitle() {

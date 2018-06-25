@@ -20,7 +20,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -35,6 +37,18 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
+
+/*
+ *  TODO ---------------------------------------------------------------------------------------
+ *  • PUT: When the user click on the event, have a pop up for edit to be shown and then
+ *         when the user click submit, you edit the event object and call PUT. Then call
+ *         notifyDataChanged.
+ *  • DELETE: When the user click on the event and have a pop up for edit to be shown and
+ *         click delete. Then the object will be deleted from the arrayList and call DELETE
+ *         then notifyDataChanged
+ *  TODO ---------------------------------------------------------------------------------------
+ */
+
 public class MainActivity extends AppCompatActivity {
     private Day[] days;
 
@@ -47,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
     private CalendarViewAdapter calendarAdapter;
 
     private ListView eventsListView;
+    private EventListAdapter eventListAdapter;
 
     private Dialog myDialog; //popup
 
@@ -58,9 +73,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         getSupportActionBar().hide(); // Hide Action Bar
         setContentView(R.layout.activity_main);
-
-        // Events ListView
-        eventsListView = findViewById(R.id.events_lv);
 
         // Get current date
         Calendar cal = Calendar.getInstance(TimeZone.getDefault());
@@ -91,6 +103,16 @@ public class MainActivity extends AppCompatActivity {
         // Dialog
         myDialog = new Dialog(this);
 
+//        ArrayList<Event> test = new ArrayList<>();
+//        Event e = new Event(1,2,1993,"yo mo", "hey", "5:00", "6:00");
+//        test.add(e);
+
+        // Events ListView
+        eventsListView = findViewById(R.id.events_lv);
+        eventListAdapter = new EventListAdapter(this, days[cal_day-1].getAllEvent());
+        eventsListView.setAdapter(eventListAdapter);
+
+        // Set up grid view
         calendarView = findViewById(R.id.calendarView);
         calendarAdapter = new CalendarViewAdapter(this, days);
         calendarView.setAdapter(calendarAdapter);
@@ -128,6 +150,11 @@ public class MainActivity extends AppCompatActivity {
 
         myDialog.setCanceledOnTouchOutside(false);
         myDialog.show();
+    }
+
+    public void showDayEvent(int pos) {
+        eventListAdapter = new EventListAdapter(this, days[pos].getAllEvent());
+        eventsListView.setAdapter(eventListAdapter);
     }
 
     private class GETAsyncTask extends AsyncTask<Void, Void, String> {
@@ -171,6 +198,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 calendarAdapter.notifyDataSetChanged();
+                eventListAdapter.notifyDataSetChanged();
 
             } catch (JSONException e) {
                 e.printStackTrace();
