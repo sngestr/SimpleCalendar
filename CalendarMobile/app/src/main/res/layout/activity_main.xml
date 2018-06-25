@@ -6,4 +6,112 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <LinearLayout
+        android:layout_width="368dp"
+        android:layout_height="495dp"
+        android:orientation="vertical"
+        tools:layout_editor_absoluteX="8dp"
+        tools:layout_editor_absoluteY="8dp"
+        tools:ignore="MissingConstraints">
+
+        <TextView
+            android:id="@+id/current_month_year_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="casual"
+            android:textAlignment="center"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:id="@+id/week_day_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@color/lightOrange">
+
+            <TextView
+                android:id="@+id/sun_day_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="casual"
+                android:text="@string/sun_day_text"
+                android:textAlignment="textStart"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/mon_day_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="casual"
+                android:text="@string/mon_day_text"
+                android:textAlignment="textStart"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tue_day_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="casual"
+                android:text="@string/tue_day_text"
+                android:textAlignment="textStart"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/wed_day_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="casual"
+                android:text="@string/wed_day_text"
+                android:textAlignment="textStart"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/thu_day_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="casual"
+                android:text="@string/thu_day_text"
+                android:textAlignment="textStart"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/fri_day_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="casual"
+                android:text="@string/fri_day_text"
+                android:textAlignment="textStart"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/sat_day_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="casual"
+                android:text="@string/sat_day_text"
+                android:textAlignment="textStart"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <GridView
+            android:id="@+id/calendarView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:numColumns="7">
+        </GridView>
+
+        <ListView
+            android:id="@+id/events_lv"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </LinearLayout>
 </android.support.constraint.ConstraintLayout>

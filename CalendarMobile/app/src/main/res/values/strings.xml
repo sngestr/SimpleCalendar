@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">SimpleCalendar</string>
+    <string name="mon_day_text">Mon</string>
+    <string name="tue_day_text">Tue</string>
+    <string name="wed_day_text">Wed</string>
+    <string name="thu_day_text">Thu</string>
+    <string name="fri_day_text">Fri</string>
+    <string name="sat_day_text">Sat</string>
+    <string name="sun_day_text">Sun</string>
 </resources>
