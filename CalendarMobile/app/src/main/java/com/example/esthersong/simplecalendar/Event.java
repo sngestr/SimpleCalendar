@@ -1,6 +1,7 @@
 package com.example.esthersong.simplecalendar;
 
 public class Event {
+    private int eventId;
     private int day;
     private int month;
     private int year;
@@ -9,7 +10,8 @@ public class Event {
     private String startTime;
     private String endTime;
 
-    public Event (int day, int month, int year, String description, String title, String startTime, String endTime){
+    public Event (int eventId, int day, int month, int year, String description, String title, String startTime, String endTime){
+        this.eventId = eventId;
         this.day = day;
         this.month = month;
         this.year = year;
@@ -17,6 +19,10 @@ public class Event {
         this.title = title;
         this.startTime = startTime;
         this.endTime = endTime;
+    }
+
+    public int getEventId(){
+        return eventId;
     }
 
     public int getDay() {

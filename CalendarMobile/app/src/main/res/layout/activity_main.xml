@@ -7,12 +7,12 @@
     tools:context=".MainActivity">
 
     <LinearLayout
-        android:layout_width="368dp"
-        android:layout_height="495dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:orientation="vertical"
+        tools:ignore="MissingConstraints"
         tools:layout_editor_absoluteX="8dp"
-        tools:layout_editor_absoluteY="8dp"
-        tools:ignore="MissingConstraints">
+        tools:layout_editor_absoluteY="8dp">
 
         <TextView
             android:id="@+id/current_month_year_tv"
@@ -27,8 +27,8 @@
             android:id="@+id/week_day_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:background="@color/lightOrange">
+            android:background="@color/lightOrange"
+            android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/sun_day_tv"
@@ -105,8 +105,7 @@
             android:id="@+id/calendarView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:numColumns="7">
-        </GridView>
+            android:numColumns="7"></GridView>
 
         <ListView
             android:id="@+id/events_lv"

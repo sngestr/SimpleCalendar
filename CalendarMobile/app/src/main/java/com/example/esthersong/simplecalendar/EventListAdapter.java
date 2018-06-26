@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.w3c.dom.Text;
@@ -37,10 +38,10 @@ public class EventListAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
         ViewHolder viewHolder;
 
-        Event event = events.get(position);
+        final Event event = events.get(position);
 
         if(convertView == null) {
             viewHolder = new ViewHolder();
@@ -59,6 +60,16 @@ public class EventListAdapter extends BaseAdapter {
         viewHolder.startTime_tv.setText(event.getStartTime());
         viewHolder.endTime_tv.setText(event.getEndTime());
         viewHolder.event_description_tv.setText(event.getDescription());
+
+        LinearLayout event_list_ll = convertView.findViewById(R.id.event_list_ll);
+        event_list_ll.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(context instanceof MainActivity) {
+                    ((MainActivity)context).editEvent(events, position);
+                }
+            }
+        });
 
         return convertView;
     }

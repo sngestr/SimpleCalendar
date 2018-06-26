@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.graphics.Color;
 import android.os.AsyncTask;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -14,6 +15,7 @@ import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -103,10 +105,6 @@ public class MainActivity extends AppCompatActivity {
         // Dialog
         myDialog = new Dialog(this);
 
-//        ArrayList<Event> test = new ArrayList<>();
-//        Event e = new Event(1,2,1993,"yo mo", "hey", "5:00", "6:00");
-//        test.add(e);
-
         // Events ListView
         eventsListView = findViewById(R.id.events_lv);
         eventListAdapter = new EventListAdapter(this, days[cal_day-1].getAllEvent());
@@ -136,14 +134,10 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 EditText title = myDialog.findViewById(R.id.title_tv);
                 EditText startTime = myDialog.findViewById(R.id.startTime_tv);
-                EditText endtime = myDialog.findViewById(R.id.endTime_tv);
+                EditText endTime = myDialog.findViewById(R.id.endTime_tv);
                 EditText description = myDialog.findViewById(R.id.description_tv);
 
-                POSTEvent(position, cal_month, cal_year, title.getText().toString(), startTime.getText().toString(), endtime.getText().toString(), description.getText().toString());
-                Event e = new Event(position, cal_month, cal_year, description.getText().toString(), title.getText().toString(), startTime.getText().toString(), endtime.getText().toString());
-                days[position].addEvent(e);
-
-                calendarAdapter.notifyDataSetChanged();
+                POSTEvent(position, cal_month, cal_year, title.getText().toString(), startTime.getText().toString(), endTime.getText().toString(), description.getText().toString());
                 myDialog.dismiss();
             }
         });
@@ -157,6 +151,75 @@ public class MainActivity extends AppCompatActivity {
         eventsListView.setAdapter(eventListAdapter);
     }
 
+    public void editEvent(final ArrayList<Event> events, final int position) {
+        myDialog.setContentView(R.layout.popup_edit_event); // Set popup layout for edit event
+        this.position = position;
+
+        // Get references to view
+        final EditText title_tv = myDialog.findViewById(R.id.title_tv);
+        final EditText startTime_tv = myDialog.findViewById(R.id.startTime_tv);
+        final EditText endTime_tv = myDialog.findViewById(R.id.endTime_tv);
+        final EditText description_tv = myDialog.findViewById(R.id.description_tv);
+
+        //Set view with current event data
+        title_tv.setText(events.get(position).getTitle());
+        startTime_tv.setText(events.get(position).getStartTime());
+        endTime_tv.setText(events.get(position).getEndTime());
+        description_tv.setText(events.get(position).getDescription());
+
+        Button closeButton = myDialog.findViewById(R.id.close_button);
+        Button updateButton = myDialog.findViewById(R.id.update_button);
+        Button deleteButton = myDialog.findViewById(R.id.delete_button);
+
+        closeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myDialog.dismiss();
+            }
+        });
+
+        updateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                //Call PUT http request
+                PUTEvent(events.get(position).getEventId(), title_tv.getText().toString(), startTime_tv.getText().toString(), endTime_tv.getText().toString(), description_tv.getText().toString());
+                // Update event object
+                events.get(position).setTitle(title_tv.getText().toString());
+                events.get(position).setStartTime(startTime_tv.getText().toString());
+                events.get(position).setEndTime(endTime_tv.getText().toString());
+                events.get(position).setDescription(description_tv.getText().toString());
+
+                calendarAdapter.notifyDataSetChanged();
+                eventListAdapter.notifyDataSetChanged();
+
+                myDialog.dismiss();
+            }
+        });
+
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Call DELETE http request
+
+                //Delete event at that position
+                events.remove(position);
+
+                // Update List and Grid view
+                calendarAdapter = new CalendarViewAdapter(MainActivity.this, days);
+                calendarView.setAdapter(calendarAdapter);
+                eventListAdapter.notifyDataSetChanged();
+
+                myDialog.dismiss();
+            }
+        });
+
+        myDialog.setCanceledOnTouchOutside(false);
+        myDialog.show();
+    }
+    /*
+     *  HTTP GET REQUEST: Get all events
+     */
     private class GETAsyncTask extends AsyncTask<Void, Void, String> {
         @Override
         protected String doInBackground(Void... voids) {
@@ -192,7 +255,7 @@ public class MainActivity extends AppCompatActivity {
                         String title = eventObj.getString("title");
                         String startTime = eventObj.getString("startTime");
                         String endTime = eventObj.getString("endTime");
-                        Event e = new Event(day, month, year, description, title, startTime, endTime);
+                        Event e = new Event(eventId, day, month, year, description, title, startTime, endTime);
                         days[day-1].addEvent(e);
 //                        title.setText(e.getDescription());
                     }
@@ -207,15 +270,49 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /*
+     *  HTTP PUT REQUEST: Update event
+     */
+    private void PUTEvent(int eventId, String title, String startTime, String endTime, String description) {
+        MediaType JSON = MediaType.parse("application/json");
+        JSONObject eventData = new JSONObject();
+
+        try {
+            eventData.put("title", title);
+            eventData.put("startTime", startTime);
+            eventData.put("endTime", endTime);
+            eventData.put("description", description);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        String postUrl = url + "/" + Integer.toString(eventId);
+        Toast.makeText(this, postUrl, Toast.LENGTH_SHORT).show();
+        RequestBody body = RequestBody.create(JSON, eventData.toString());
+        Request newReq = new Request.Builder()
+                .url(postUrl)
+                .put(body)
+                .build();
+        client.newCall(newReq).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {}
+        });
+    }
+
+    /*
      *  HTTP POST REQUEST: Post a new event with OkHttp and get a response of the posted event
      */
-    public void POSTEvent(int day, int month, int year, String title, String startTime, String endTime, String description){
+    private void POSTEvent(final int day, final int month, final int year, final String title, final String startTime, final String endTime, final String description){
         MediaType JSON = MediaType.parse("application/json");
         JSONObject eventData = new JSONObject();
 
         try {
             eventData.put("day", day + 1); // add one bc based on position of grid view
-            eventData.put("month", month);
+            eventData.put("month", month + 1); //add one bc based on date which is 0 index
             eventData.put("year", year);
             eventData.put("description", description);
             eventData.put("title", title);
@@ -239,22 +336,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if(response.isSuccessful()){
-//                    final String myResponse = response.body().string();
-//                    JSONObject newEvent = null;
-//                    try {
-//                        newEvent = new JSONObject(myResponse);
-//                        int eventId = newEvent.getInt("eventId");
-//                        int day = newEvent.getInt("day");
-//                        int month = newEvent.getInt("month");
-//                        int year = newEvent.getInt("year");
-//                        String description = newEvent.getString("description");
-//
-//                        Event e = new Event(day, month, year, description, "database", "5:00", "6:00");
-//                        days[day-1].addEvent(e);
-//                        cA.notifyDataSetChanged();
-//                    } catch (JSONException e) {
-//                        e.printStackTrace();
-//                    }
+                    final String myResponse = response.body().string();
+                    JSONObject newEvent = null;
+                    try {
+                        newEvent = new JSONObject(myResponse);
+                        int eventId = newEvent.getInt("eventId");
+
+                        Event e = new Event(eventId, day, month, year, description, title, startTime, endTime);
+                        days[day].addEvent(e);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         });
