@@ -1,15 +1,11 @@
 package com.example.esthersong.simplecalendar;
 
-import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.graphics.Color;
 import android.os.AsyncTask;
-import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
@@ -22,13 +18,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.Locale;
 import java.util.TimeZone;
 
 import okhttp3.Call;
@@ -39,18 +32,6 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-
-/*
- *  TODO ---------------------------------------------------------------------------------------
- *  • PUT: When the user click on the event, have a pop up for edit to be shown and then
- *         when the user click submit, you edit the event object and call PUT. Then call
- *         notifyDataChanged.
- *  • DELETE: When the user click on the event and have a pop up for edit to be shown and
- *         click delete. Then the object will be deleted from the arrayList and call DELETE
- *         then notifyDataChanged
- *  TODO ---------------------------------------------------------------------------------------
- */
-
 public class MainActivity extends AppCompatActivity {
     private Day[] days;
 
@@ -58,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private int cal_month;
     private int cal_day;
     private int position;
+    private int daysInMonth;
 
     private GridView calendarView;
     private CalendarViewAdapter calendarAdapter;
@@ -66,15 +48,18 @@ public class MainActivity extends AppCompatActivity {
     private EventListAdapter eventListAdapter;
 
     private Dialog myDialog; //popup
+    TextView current_month_year_tv;
 
     private OkHttpClient client = new OkHttpClient();
-    private String url = "https://glacial-stream-73172.herokuapp.com/events";
+    private final String url = "https://glacial-stream-73172.herokuapp.com/events";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getSupportActionBar().hide(); // Hide Action Bar
         setContentView(R.layout.activity_main);
+
+        Toast.makeText(this,"Long press to create event", Toast.LENGTH_SHORT).show();
 
         // Get current date
         Calendar cal = Calendar.getInstance(TimeZone.getDefault());
@@ -85,19 +70,19 @@ public class MainActivity extends AppCompatActivity {
 
         // Set current month and year
         int color = Color.parseColor("#EABA9D");
-        TextView current_month_year_tv = findViewById(R.id.current_month_year_tv);
+        current_month_year_tv = findViewById(R.id.current_month_year_tv);
         current_month_year_tv.setBackgroundColor(color);
         String month_name = new SimpleDateFormat("MMM").format(cal.getTime());
         current_month_year_tv.setText( month_name + " " + cal_year);
 
         // Gets the amount of days in the MONTH
         cal = new GregorianCalendar(cal_year, cal_month, cal_day);
-        int daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+        daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
         days = new Day[daysInMonth];
 
         for(int i = 0; i < daysInMonth; i++){
-            Day newday = new Day(i);
-            days[i] = newday;
+            Day newDay = new Day(i);
+            days[i] = newDay;
         }
 
         new GETAsyncTask().execute();
@@ -114,6 +99,57 @@ public class MainActivity extends AppCompatActivity {
         calendarView = findViewById(R.id.calendarView);
         calendarAdapter = new CalendarViewAdapter(this, days);
         calendarView.setAdapter(calendarAdapter);
+    }
+
+    /*
+     *  HTTP GET REQUEST: Get all events
+     */
+    private class GETAsyncTask extends AsyncTask<Void, Void, String> {
+        @Override
+        protected String doInBackground(Void... voids) {
+            Request request = new Request.Builder()
+                    .url(url)
+                    .build();
+
+            try {
+                Response response = client.newCall(request).execute();
+                return response.body().string();
+            } catch (IOException io) {
+                return io.toString();
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String myResponse){
+            JSONObject events;
+            try {
+                events = new JSONObject(myResponse);
+                JSONArray jArray = events.getJSONArray("events");
+
+                if (jArray != null) {
+                    for (int i = 0; i < jArray.length(); i++) {
+                        JSONObject eventObj = jArray.getJSONObject(i);
+                        int eventId = eventObj.getInt("eventId");
+                        int day = eventObj.getInt("day");
+                        int month = eventObj.getInt("month");
+                        int year = eventObj.getInt("year");
+
+                        if(cal_year == year && cal_month == (month-1)){
+                            String description = eventObj.getString("description");
+                            String title = eventObj.getString("title");
+                            String startTime = eventObj.getString("startTime");
+                            String endTime = eventObj.getString("endTime");
+                            Event e = new Event(eventId, day, month, year, description, title, startTime, endTime);
+                            days[day-1].addEvent(e);
+                        }
+                    }
+                    calendarAdapter.notifyDataSetChanged();
+                    eventListAdapter.notifyDataSetChanged();
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void createEvent(final int pos){
@@ -240,57 +276,6 @@ public class MainActivity extends AppCompatActivity {
             return null;
         }
     }
-    /*
-     *  HTTP GET REQUEST: Get all events
-     */
-    private class GETAsyncTask extends AsyncTask<Void, Void, String> {
-        @Override
-        protected String doInBackground(Void... voids) {
-            Request request = new Request.Builder()
-                    .url(url)
-                    .build();
-
-            try {
-                Response response = client.newCall(request).execute();
-                return response.body().string();
-            } catch (IOException io) {
-                return io.toString();
-            }
-        }
-
-        @SuppressLint("SetTextI18n")
-        @Override
-        protected void onPostExecute(String myResponse){
-            JSONObject events;
-            try {
-                events = new JSONObject(myResponse);
-                JSONArray jArray = events.getJSONArray("events");
-
-                if (jArray != null) {
-                    for (int i = 0; i < jArray.length(); i++){
-                        JSONObject eventObj = jArray.getJSONObject(i);
-                        int eventId = eventObj.getInt("eventId");
-                        int day = eventObj.getInt("day");
-                        int month = eventObj.getInt("month");
-                        int year = eventObj.getInt("year");
-
-                        String description = eventObj.getString("description");
-                        String title = eventObj.getString("title");
-                        String startTime = eventObj.getString("startTime");
-                        String endTime = eventObj.getString("endTime");
-                        Event e = new Event(eventId, day, month, year, description, title, startTime, endTime);
-                        days[day-1].addEvent(e);
-//                        title.setText(e.getDescription());
-                    }
-                }
-                calendarAdapter.notifyDataSetChanged();
-                eventListAdapter.notifyDataSetChanged();
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-    }
 
     /*
      *  HTTP PUT REQUEST: Update event
@@ -309,7 +294,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         String postUrl = url + "/" + Integer.toString(eventId);
-        Toast.makeText(this, postUrl, Toast.LENGTH_SHORT).show();
         RequestBody body = RequestBody.create(JSON, eventData.toString());
         Request newReq = new Request.Builder()
                 .url(postUrl)
