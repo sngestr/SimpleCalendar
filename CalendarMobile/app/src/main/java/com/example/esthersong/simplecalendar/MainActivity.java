@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().hide(); // Hide Action Bar
         setContentView(R.layout.activity_main);
 
-        Toast.makeText(this,"Long press to create event", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this,"Long press day box to create event", Toast.LENGTH_LONG).show();
 
         // Get current date
         Calendar cal = Calendar.getInstance(TimeZone.getDefault());
