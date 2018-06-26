@@ -181,7 +181,6 @@ public class MainActivity extends AppCompatActivity {
         updateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 //Call PUT http request
                 PUTEvent(events.get(position).getEventId(), title_tv.getText().toString(), startTime_tv.getText().toString(), endTime_tv.getText().toString(), description_tv.getText().toString());
                 // Update event object
@@ -201,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //Call DELETE http request
-
+                new DELETEAsyncTask(events.get(position).getEventId()).execute();
                 //Delete event at that position
                 events.remove(position);
 
@@ -216,6 +215,30 @@ public class MainActivity extends AppCompatActivity {
 
         myDialog.setCanceledOnTouchOutside(false);
         myDialog.show();
+    }
+
+    private class DELETEAsyncTask extends AsyncTask<Void, Void, Void> {
+        private int eventId;
+
+        public DELETEAsyncTask(int eventId) { this.eventId = eventId; }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            String deleteUrl = url + "/" + eventId;
+
+            Request request = new Request.Builder()
+                    .url(deleteUrl)
+                    .delete()
+                    .build();
+
+            try {
+                Response response = client.newCall(request).execute();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
     }
     /*
      *  HTTP GET REQUEST: Get all events
@@ -297,7 +320,6 @@ public class MainActivity extends AppCompatActivity {
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
             }
-
             @Override
             public void onResponse(Call call, Response response) throws IOException {}
         });
